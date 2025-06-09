@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EatVenture - Idle Restaurant Game</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    
+    <!-- AdMob Script -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-app-pub-6476313491240615" crossorigin="anonymous"></script>
+    
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            padding: 20px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            font-size: 28px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .money-display {
+            background: linear-gradient(90deg, #48c6ef, #6f86d6);
+            padding: 15px;
+            text-align: center;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .restaurant-area {
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            padding: 30px;
+            text-align: center;
+            min-height: 200px;
+            position: relative;
+        }
+
+        .customer {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 50%;
+            font-size: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .customer:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .customer.served {
+            animation: serveAnimation 0.5s ease;
+        }
+
+        @keyframes serveAnimation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            border-radius: 4px;
+            transition: width 0.1s ease;
+        }
+
+        .upgrades-section {
+            background: #f8f9fa;
+            padding: 20px;
+        }
+
+        .upgrade-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .upgrade-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upgrade-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .upgrade-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .upgrade-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .upgrade-btn {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .upgrade-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .coin-effect {
+            position: absolute;
+            font-size: 24px;
+            color: #ffd700;
+            pointer-events: none;
+            animation: coinFloat 1s ease-out forwards;
+            z-index: 1000;
+        }
+
+        @keyframes coinFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px);
+            }
+        }
+
+        .stats-bar {
+            background: #343a40;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-around;
+            font-weight: bold;
+        }
+
+        .restaurant-type {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        /* Ad Container Styles */
+        .ad-container {
+            margin: 20px 0;
+            text-align: center;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .ad-banner {
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .game-container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                font-size: 24px;
+                padding: 15px;
+            }
+            
+            .money-display {
+                font-size: 28px;
+                padding: 12px;
+            }
+            
+            .upgrade-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .customer {
+                font-size: 35px;
+                margin: 8px;
+                padding: 12px;
+            }
+        }
+
+        /* Touch feedback */
+        .touch-feedback {
+            background: rgba(255, 255, 255, 0.3);
+            animation: touchRipple 0.3s ease;
+        }
+
+        @keyframes touchRipple {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Header -->
+        <div class="header">
+            <i class="fas fa-utensils"></i> EatVenture
+        </div>
+
+        <!-- Money Display -->
+        <div class="money-display">
+            <i class="fas fa-coins"></i> $<span id="money">0</span>
+        </div>
+
+        <!-- Banner Ad -->
+        <div class="ad-container">
+            <ins class="adsbygoogle ad-banner"
+                 style="display:block"
+                 data-ad-client="ca-app-pub-6476313491240615"
+                 data-ad-slot="3068497916"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+        </div>
+
+        <!-- Restaurant Area -->
+        <div class="restaurant-area" id="restaurantArea">
+            <div class="restaurant-type" id="restaurantType">🏪 Food Stall</div>
+            <div id="customersContainer"></div>
+            <div class="mt-4">
+                <button id="serveBtn" class="upgrade-btn text-2xl px-8 py-4">
+                    <i class="fas fa-hand-pointer"></i> Tap to Serve!
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div><i class="fas fa-users"></i> Customers: <span id="customersServed">0</span></div>
+            <div><i class="fas fa-clock"></i> Income/sec: $<span id="incomePerSecond">0</span></div>
+            <div><i class="fas fa-user-tie"></i> Staff: <span id="staffCount">0</span></div>
+        </div>
+
+        <!-- Upgrades Section -->
+        <div class="upgrades-section">
+            <h2 class="text-2xl font-bold text-center mb-4">
+                <i class="fas fa-arrow-up"></i> Upgrades
+            </h2>
+            
+            <div class="upgrade-grid">
+                <!-- Service Speed Upgrade -->
+                <div class="upgrade-card" id="speedUpgrade">
+                    <div class="upgrade-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    <h3 class="font-bold">Faster Service</h3>
+                    <p class="text-sm text-gray-600">Serve customers faster</p>
+                    <p class="font-bold text-lg">Level: <span id="speedLevel">1</span></p>
+                    <button class="upgrade-btn" onclick="buyUpgrade('speed')">
+                        Buy $<span id="speedCost">50</span>
+                    </button>
+                </div>
+
+                <!-- Staff Upgrade -->
+                <div class="upgrade-card" id="staffUpgrade">
+                    <div class="upgrade-icon"><i class="fas fa-user-plus"></i></div>
+                    <h3 class="font-bold">Hire Staff</h3>
+                    <p class="text-sm text-gray-600">Automate customer service</p>
+                    <p class="font-bold text-lg">Staff: <span id="staffLevel">0</span></p>
+                    <button class="upgrade-btn" onclick="buyUpgrade('staff')">
+                        Hire $<span id="staffCost">200</span>
+                    </button>
+                </div>
+
+                <!-- Restaurant Upgrade -->
+                <div class="upgrade-card" id="restaurantUpgrade">
+                    <div class="upgrade-icon"><i class="fas fa-store-alt"></i></div>
+                    <h3 class="font-bold">Upgrade Restaurant</h3>
+                    <p class="text-sm text-gray-600">Unlock better restaurants</p>
+                    <p class="font-bold text-lg">Level: <span id="restaurantLevel">1</span></p>
+                    <button class="upgrade-btn" onclick="buyUpgrade('restaurant')">
+                        Upgrade $<span id="restaurantCost">1000</span>
+                    </button>
+                </div>
+
+                <!-- Income Multiplier -->
+                <div class="upgrade-card" id="multiplierUpgrade">
+                    <div class="upgrade-icon"><i class="fas fa-multiply"></i></div>
+                    <h3 class="font-bold">Income Boost</h3>
+                    <p class="text-sm text-gray-600">Multiply earnings</p>
+                    <p class="font-bold text-lg">x<span id="multiplierLevel">1</span></p>
+                    <button class="upgrade-btn" onclick="buyUpgrade('multiplier')">
+                        Buy $<span id="multiplierCost">500</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Watch Ad for Bonus -->
+        <div class="ad-container">
+            <button class="upgrade-btn text-lg px-6 py-3" onclick="showRewardedAd()">
+                <i class="fas fa-video"></i> Watch Ad for Bonus Money!
+            </button>
+        </div>
+
+        <!-- Another Banner Ad -->
+        <div class="ad-container">
+            <ins class="adsbygoogle ad-banner"
+                 style="display:block"
+                 data-ad-client="ca-app-pub-6476313491240615"
+                 data-ad-slot="3068497916"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            money: 0,
+            customersServed: 0,
+            upgrades: {
+                speed: { level: 1, cost: 50, multiplier: 1.5 },
+                staff: { level: 0, cost: 200, multiplier: 2 },
+                restaurant: { level: 1, cost: 1000, multiplier: 3 },
+                multiplier: { level: 1, cost: 500, multiplier: 1.2 }
+            },
+            baseIncome: 10,
+            serviceTime: 2000,
+            autoIncome: 0,
+            lastSave: Date.now()
+        };
+
+        // Restaurant Types
+        const restaurantTypes = [
+            { name: "🏪 Food Stall", emoji: "🌭", income: 1 },
+            { name: "☕ Cafe", emoji: "☕", income: 2 },
+            { name: "🍣 Sushi Bar", emoji: "🍣", income: 5 },
+            { name: "🍽️ Luxury Restaurant", emoji: "🥂", income: 10 }
+        ];
+
+        // Customer Emojis
+        const customerEmojis = ["😊", "😋", "🤤", "😍", "🥰", "😄", "😃", "🙂"];
+
+        // Initialize AdMob
+        function initializeAds() {
+            try {
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            } catch (e) {
+                console.log("AdMob initialization:", e);
+            }
+        }
+
+        // Show Rewarded Ad
+        function showRewardedAd() {
+            // Simulate rewarded ad - in real implementation, this would trigger AdMob rewarded ad
+            if (confirm("Watch a short ad to earn bonus money?")) {
+                const bonus = Math.floor(gameState.money * 0.5) + 100;
+                addMoney(bonus);
+                showCoinEffect(document.querySelector('.money-display'), bonus);
+                
+                // Show interstitial ad after reward
+                setTimeout(showInterstitialAd, 1000);
+            }
+        }
+
+        // Show Interstitial Ad
+        function showInterstitialAd() {
+            // In real implementation, this would show AdMob interstitial ad
+            // For demo purposes, we'll just log it
+            console.log("Interstitial ad would show here");
+        }
+
+        // Game Functions
+        function addMoney(amount) {
+            const multiplier = gameState.upgrades.multiplier.level;
+            const restaurant = restaurantTypes[gameState.upgrades.restaurant.level - 1];
+            const finalAmount = Math.floor(amount * multiplier * restaurant.income);
+            gameState.money += finalAmount;
+            updateUI();
+            return finalAmount;
+        }
+
+        function serveCustomer() {
+            const customer = document.querySelector('.customer:not(.served)');
+            if (customer) {
+                customer.classList.add('served');
+                const earned = addMoney(gameState.baseIncome);
+                gameState.customersServed++;
+                
+                showCoinEffect(customer, earned);
+                
+                setTimeout(() => {
+                    customer.remove();
+                    spawnCustomer();
+                }, 500);
+                
+                updateUI();
+                
+                // Show interstitial ad every 20 customers
+                if (gameState.customersServed % 20 === 0) {
+                    setTimeout(showInterstitialAd, 2000);
+                }
+            }
+        }
+
+        function spawnCustomer() {
+            const container = document.getElementById('customersContainer');
+            const customerCount = container.children.length;
+            
+            if (customerCount < 6) {
+                const customer = document.createElement('div');
+                customer.className = 'customer';
+                customer.innerHTML = customerEmojis[Math.floor(Math.random() * customerEmojis.length)];
+                
+                // Add progress bar
+                const progressBar = document.createElement('div');
+                progressBar.className = 'progress-bar';
+                const progressFill = document.createElement('div');
+                progressFill.className = 'progress-fill';
+                progressBar.appendChild(progressFill);
+                customer.appendChild(progressBar);
+                
+                container.appendChild(customer);
+                
+                // Animate progress bar
+                let progress = 100;
+                const interval = setInterval(() => {
+                    progress -= 1;
+                    progressFill.style.width = progress + '%';
+                    
+                    if (progress <= 0) {
+                        clearInterval(interval);
+                        customer.remove();
+                        spawnCustomer();
+                    }
+                }, gameState.serviceTime / 100);
+                
+                customer.onclick = () => {
+                    clearInterval(interval);
+                    serveCustomer();
+                };
+            }
+        }
+
+        function buyUpgrade(type) {
+            const upgrade = gameState.upgrades[type];
+            
+            if (gameState.money >= upgrade.cost) {
+                gameState.money -= upgrade.cost;
+                upgrade.level++;
+                upgrade.cost = Math.floor(upgrade.cost * upgrade.multiplier);
+                
+                // Apply upgrade effects
+                switch(type) {
+                    case 'speed':
+                        gameState.serviceTime = Math.max(500, gameState.serviceTime * 0.9);
+                        break;
+                    case 'staff':
+                        gameState.autoIncome += 5;
+                        break;
+                    case 'restaurant':
+                        updateRestaurantType();
+                        break;
+                    case 'multiplier':
+                        // Multiplier effect is applied in addMoney function
+                        break;
+                }
+                
+                updateUI();
+                saveGame();
+                
+                // Show interstitial ad every 5 upgrades
+                if ((upgrade.level - 1) % 5 === 0) {
+                    setTimeout(showInterstitialAd, 1000);
+                }
+            }
+        }
+
+        function updateRestaurantType() {
+            const level = Math.min(gameState.upgrades.restaurant.level, restaurantTypes.length);
+            const restaurant = restaurantTypes[level - 1];
+            document.getElementById('restaurantType').textContent = restaurant.name;
+            
+            const area = document.getElementById('restaurantArea');
+            const backgrounds = [
+                'linear-gradient(135deg, #a8edea, #fed6e3)',
+                'linear-gradient(135deg, #d299c2, #fef9d7)',
+                'linear-gradient(135deg, #89f7fe, #66a6ff)',
+                'linear-gradient(135deg, #fdbb2d, #22c1c3)'
+            ];
+            area.style.background = backgrounds[level - 1] || backgrounds[0];
+        }
+
+        function showCoinEffect(element, amount) {
+            const coin = document.createElement('div');
+            coin.className = 'coin-effect';
+            coin.textContent = `+$${amount}`;
+            
+            const rect = element.getBoundingClientRect();
+            coin.style.left = (rect.left + rect.width / 2) + 'px';
+            coin.style.top = rect.top + 'px';
+            coin.style.position = 'fixed';
+            
+            document.body.appendChild(coin);
+            
+            setTimeout(() => coin.remove(), 1000);
+        }
+
+        function updateUI() {
+            document.getElementById('money').textContent = Math.floor(gameState.money).toLocaleString();
+            document.getElementById('customersServed').textContent = gameState.customersServed.toLocaleString();
+            document.getElementById('incomePerSecond').textContent = gameState.autoIncome;
+            document.getElementById('staffCount').textContent = gameState.upgrades.staff.level;
+            
+            // Update upgrade displays
+            Object.keys(gameState.upgrades).forEach(type => {
+                const upgrade = gameState.upgrades[type];
+                document.getElementById(type + 'Level').textContent = upgrade.level;
+                document.getElementById(type + 'Cost').textContent = upgrade.cost.toLocaleString();
+                
+                const card = document.getElementById(type + 'Upgrade');
+                if (gameState.money >= upgrade.cost) {
+                    card.classList.remove('disabled');
+                } else {
+                    card.classList.add('disabled');
+                }
+            });
+        }
+
+        function saveGame() {
+            gameState.lastSave = Date.now();
+            localStorage.setItem('eatventureGame', JSON.stringify(gameState));
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('eatventureGame');
+            if (saved) {
+                const loadedState = JSON.parse(saved);
+                gameState = { ...gameState, ...loadedState };
+                
+                // Calculate offline earnings
+                const timeDiff = Date.now() - gameState.lastSave;
+                const offlineHours = timeDiff / (1000 * 60 * 60);
+                const offlineEarnings = Math.floor(gameState.autoIncome * offlineHours * 60);
+                
+                if (offlineEarnings > 0) {
+                    gameState.money += offlineEarnings;
+                    alert(`Welcome back! You earned $${offlineEarnings.toLocaleString()} while away!`);
+                }
+                
+                updateRestaurantType();
+            }
+        }
+
+        // Game Loop
+        function gameLoop() {
+            // Auto income from staff
+            if (gameState.autoIncome > 0) {
+                addMoney(gameState.autoIncome / 10); // Divide by 10 for per-100ms income
+            }
+            
+            // Auto serve customers if staff available
+            if (gameState.upgrades.staff.level > 0 && Math.random() < 0.1) {
+                serveCustomer();
+            }
+            
+            // Spawn customers randomly
+            if (Math.random() < 0.05) {
+                spawnCustomer();
+            }
+            
+            updateUI();
+        }
+
+        // Event Listeners
+        document.getElementById('serveBtn').onclick = serveCustomer;
+
+        // Touch events for mobile
+        document.addEventListener('touchstart', function(e) {
+            if (e.target.classList.contains('customer')) {
+                e.target.classList.add('touch-feedback');
+                setTimeout(() => e.target.classList.remove('touch-feedback'), 300);
+            }
+        });
+
+        // Initialize Game
+        window.onload = function() {
+            loadGame();
+            updateUI();
+            updateRestaurantType();
+            
+            // Spawn initial customers
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => spawnCustomer(), i * 1000);
+            }
+            
+            // Start game loop
+            setInterval(gameLoop, 100);
+            
+            // Auto save every 30 seconds
+            setInterval(saveGame, 30000);
+            
+            // Initialize ads
+            setTimeout(initializeAds, 1000);
+        };
+
+        // Save on page unload
+        window.addEventListener('beforeunload', saveGame);
+    </script>
+</body>
+</html>
